@@ -15,13 +15,18 @@
     
     <style>
         /* 这里保留了DeepSeek原本的样式，并修复了一些小细节 */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
         body {
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             background-attachment: fixed; padding: 20px; color: #333;
         }
-        .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 30px; }
+        .container {
+            width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 30px;
+        }
         
         .header {
             text-align: center; color: #fff; padding: 30px; border-radius: 15px;
@@ -50,31 +55,123 @@
         .changelog-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; }
         .changelog-date { font-weight: bold; color: #00ddff; margin-right: 15px; min-width: 100px; }
 
-        /* 编辑器样式 */
-        .markdown-container { margin-top: 20px; }
-        .markdown-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        /* 编辑器样式!! */
+        .markdown-preview {
+            min-height: 100px; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: linear-gradient(135deg, #111 0%, #666 100%); 
+            /* 不要浅色背景，text本身是白色的 */
+            border: 1px solid #eee;
+            line-height: 1.6; /* 增加行高，阅读更舒适 */
+        }
+
+        /* 修复1: 列表缩进问题 */
+        .markdown-preview ul, 
+        .markdown-preview ol {
+            padding-left: 2em; /* 强制左侧缩进 */
+            margin-bottom: 1em;
+        }
+        
+        /* 修复1补充: 列表项之间的间距 */
+        .markdown-preview li {
+            margin-bottom: 0.5em;
+        }
+
+        /* 修复2: 代码区和文字区的距离 */
+        .markdown-preview p {
+            margin-bottom: 1em; /* 段落底部增加间距 */
+        }
+        .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 0.3em;
+        }
+
+        /* 修复3 & 4: 代码块样式美化 */
+        .markdown-preview pre {
+            background: #282c34; /* 深色背景 */
+            padding: 0;          /*以此来配合 header 条 */
+            border-radius: 8px; 
+            overflow: hidden;    /* 防止内容溢出圆角 */
+            margin: 1.5em 0;     /* 增加上下间距 */
+            position: relative;  /* 为语言标签定位做准备 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 代码字体设置 - 修复字体不显示为等宽的问题 */
+        .markdown-preview code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important; /* 强制使用等宽字体 */
+            font-size: 0.95rem;
+        }
+
+        /* Mac 风格的代码窗口头部 */
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: #21252b;
+            border-bottom: 1px solid #3b4048;
+        }
+
+        /* 红黄绿三个小圆点 */
+        .window-controls {
+            display: flex;
+            gap: 6px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background-color: #ff5f56; }
+        .yellow { background-color: #ffbd2e; }
+        .green { background-color: #27c93f; }
+
+        /* 修复4: 显示语言名称 */
+        .lang-label {
+            color: #abb2bf;
+            font-size: 0.8rem;
+            font-family: sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* 代码内容的内边距 */
+        .markdown-preview pre code.hljs {
+            padding: 20px;
+            display: block;
+            overflow-x: auto;
+        }
+
+        /* 行内代码样式 (比如 `git push` 这种) */
+        .markdown-preview p code {
+            background-color: #f3f4f4;
+            color: #c7254e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace !important;
+        }
+
+        /* ----------------------------------------------------------- */
+
+        /* 之前的编辑器样式保持不变 */
+        .editor-wrapper { display: flex; gap: 20px; flex-direction: column; }
+        .markdown-editor {
+            width: 100%; height: 200px; padding: 15px; border-radius: 8px;
+            border: 1px solid #ddd; background: #1e1e1e; color: #fff; 
+            font-family: 'Consolas', monospace;
+            resize: vertical;
+            display: none; /* 【修改点1】默认隐藏编辑器 */
+        }
+        /* 【修改点2】补全了这段缺失的样式：只有在 active 时才显示 */
+        .markdown-editor.active { 
+            display: block; 
+        }
+        
+        .markdown-header { display: flex; justify-content: space-between; margin-bottom: 10px; margin-top: 20px; }
         .editor-toggle {
             padding: 5px 15px; background: #6a11cb; color: white; border: none; 
             border-radius: 5px; cursor: pointer;
         }
-        
-        .editor-wrapper { display: flex; gap: 20px; flex-direction: column; }
-        
-        .markdown-editor {
-            width: 100%; height: 200px; padding: 15px; border-radius: 8px;
-            border: 1px solid #ddd; background: #1e1e1e; color: #fff; font-family: monospace;
-            display: none; /* 默认隐藏 */
-        }
-        .markdown-editor.active { display: block; }
-
-        /* 预览区域重要样式 */
-        .markdown-preview {
-            min-height: 100px; padding: 20px; border-radius: 8px; background: #fff;
-            border: 1px solid #eee;
-        }
-        .markdown-preview img { max-width: 100%; border-radius: 5px; }
-        .markdown-preview pre { background: #2d2d2d; padding: 15px; border-radius: 8px; overflow-x: auto; color: #fff; }
-        .markdown-preview blockquote { border-left: 4px solid #6a11cb; padding-left: 15px; color: #666; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -98,15 +195,7 @@
             <div class="changelog-content" id="changelogContent">
                 <ul class="changelog-list">
                     <li class="changelog-item">
-                        <span class="changelog-date">2024-03-20</span>
-                        <span>修复了 HTML 标签未闭合的严重 Bug</span>
-                    </li>
-                    <li class="changelog-item">
-                        <span class="changelog-date">2024-03-19</span>
-                        <span>添加了 JavaScript 逻辑，让页面动起来了</span>
-                    </li>
-                    <li class="changelog-item">
-                        <span class="changelog-date">2024-03-18</span>
+                        <span class="changelog-date">2025-12-09</span>
                         <span>初始化项目</span>
                     </li>
                 </ul>
@@ -116,23 +205,36 @@
         <!-- Markdown 编辑器模块 -->
         <div class="markdown-container">
             <div class="markdown-header">
-                <h3><i class="fas fa-edit"></i> 实时 Markdown 演示</h3>
+                <h3><i class="fas fa-edit"></i> 实时编辑器</h3>
                 <button class="editor-toggle" id="editorToggle">显示/隐藏源码</button>
             </div>
             
             <div class="editor-wrapper">
-                <!-- 这里补全了原本断掉的 Textarea -->
                 <textarea class="markdown-editor" id="markdownEditor">
-## 欢迎使用
-这是一个 **实时预览** 的编辑器。
+# 样式测试标题
 
-- 你可以在这里修改文字
-- 下面会自动变化
-- 支持代码高亮
+这里测试**加粗**和列表缩进的问题：
+
+1. 第一点内容（左边应该有缩进）
+2. 第二点内容
+   - 嵌套列表也应该缩进
+   - 看着更舒服
+
+这里测试段落和代码块之间的距离（应该比较宽）。
 
 ```javascript
-console.log("Hello GitHub!");
+// 这是一个 JavaScript 示例
+// 注意右上角应该显示 "JAVASCRIPT"
+function sayHello() {
+    console.log("字体已经是等宽的了！");
+}
 ```
+```python
+# 这是一个 Python 示例
+def test():
+    print("支持自动识别语言")
+```
+这段文字不应该紧贴着上面的代码块。
 </textarea>
             
             <!-- 这里添加了原本缺失的预览区域 -->
@@ -142,30 +244,59 @@ console.log("Hello GitHub!");
 </div>
 
 <p style="color: rgba(255,255,255,0.6); margin-top: 20px; font-size: 0.8rem;">
-    Powered by Git & GitHub Pages
+    Powered by Fyzalea
 </p>
 </div>
 <!-- 这里添加了原本缺失的 JavaScript 逻辑 -->
 <script>
-// 1. 初始化 Markdown 解析器
 const editor = document.getElementById('markdownEditor');
 const preview = document.getElementById('markdownPreview');
 
-// 渲染函数
 function renderMarkdown() {
 const rawText = editor.value;
-// 使用 marked 库将 markdown 转换为 html
+
+// 1. 转换 Markdown 为 HTML
 preview.innerHTML = marked.parse(rawText);
-// 让 highlight.js 对代码块进行高亮
+
+// 2. 处理代码块：高亮 + 添加 Mac 风格头部 + 语言标签
 document.querySelectorAll('pre code').forEach((el) => {
+// 先让 highlight.js 进行高亮处理
 hljs.highlightElement(el);
+
+// 获取语言名称 (例如 language-javascript -> javascript)
+let lang = "Code"; // 默认值
+el.classList.forEach(cls => {
+if (cls.startsWith('language-')) {
+lang = cls.replace('language-', '');
+}
+});
+
+// 获取 <pre> 父元素
+const pre = el.parentElement;
+
+// 如果已经添加过 header，就不再重复添加（防止输入时闪烁重复）
+if (pre.querySelector('.code-header')) return;
+
+// 创建 Mac 风格的头部 DOM
+const header = document.createElement('div');
+header.className = 'code-header';
+header.innerHTML = `
+<div class="window-controls">
+<div class="dot red"></div>
+<div class="dot yellow"></div>
+<div class="dot green"></div>
+</div>
+<div class="lang-label">${lang}</div>
+`;
+
+// 将 header 插入到 <pre> 的最前面
+pre.insertBefore(header, el);
 });
 }
 
-// 监听输入，实时渲染
 editor.addEventListener('input', renderMarkdown);
 
-// 页面加载时先渲染一次
+// 初始化
 renderMarkdown();
 
 // 2. 更新日志折叠逻辑
