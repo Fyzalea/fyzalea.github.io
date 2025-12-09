@@ -2,21 +2,188 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人主页</title>
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入代码高亮样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <!-- 引入 Markdown 解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入代码高亮库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    
     <style>
+        /* 这里保留了DeepSeek原本的样式，并修复了一些小细节 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
         body {
-            font-family: sans-serif;
-            text-align: center;
-            padding-top: 50px;
-            background-color: #f0f0f0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background-attachment: fixed; padding: 20px; color: #333;
         }
-        h1 { color: #333; }
-        p { color: #666; }
+        .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 30px; }
+        
+        .header {
+            text-align: center; color: #fff; padding: 30px; border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .subtitle { color: #e0e0e0; }
+
+        .content-panel {
+            color: #fff; padding: 30px; border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 更新日志样式 */
+        .changelog-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%); border-radius: 8px; cursor: pointer; user-select: none;
+        }
+        .changelog-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+        }
+        .changelog-content.active { max-height: 500px; }
+        .changelog-list { list-style: none; padding: 15px; }
+        .changelog-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; }
+        .changelog-date { font-weight: bold; color: #00ddff; margin-right: 15px; min-width: 100px; }
+
+        /* 编辑器样式 */
+        .markdown-container { margin-top: 20px; }
+        .markdown-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .editor-toggle {
+            padding: 5px 15px; background: #6a11cb; color: white; border: none; 
+            border-radius: 5px; cursor: pointer;
+        }
+        
+        .editor-wrapper { display: flex; gap: 20px; flex-direction: column; }
+        
+        .markdown-editor {
+            width: 100%; height: 200px; padding: 15px; border-radius: 8px;
+            border: 1px solid #ddd; background: #1e1e1e; color: #fff; font-family: monospace;
+            display: none; /* 默认隐藏 */
+        }
+        .markdown-editor.active { display: block; }
+
+        /* 预览区域重要样式 */
+        .markdown-preview {
+            min-height: 100px; padding: 20px; border-radius: 8px; background: #fff;
+            border: 1px solid #eee;
+        }
+        .markdown-preview img { max-width: 100%; border-radius: 5px; }
+        .markdown-preview pre { background: #2d2d2d; padding: 15px; border-radius: 8px; overflow-x: auto; color: #fff; }
+        .markdown-preview blockquote { border-left: 4px solid #6a11cb; padding-left: 15px; color: #666; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <p>这是我的第一个 GitHub Page 网页。</p>
-    <p>如果能看到这段字，说明配置成功了！</p>
+
+<div class="container">
+    <div class="header">
+        <h1>Hello, World!</h1>
+        <p class="subtitle">这是修复后的 GitHub Page 演示页面</p>
+    </div>
+
+    <div class="content-panel">
+        <h2>🎉 恭喜！网站配置成功</h2>
+        <p>如果你能看到这个页面，说明你的 Git Push 操作完全正确。</p>
+
+        <!-- 更新日志模块 -->
+        <div style="margin-top: 30px;">
+            <div class="changelog-header" id="changelogToggle">
+                <h3><i class="fas fa-history"></i> 更新日志 (点击展开)</h3>
+                <span id="toggleIcon">▼</span>
+            </div>
+            <div class="changelog-content" id="changelogContent">
+                <ul class="changelog-list">
+                    <li class="changelog-item">
+                        <span class="changelog-date">2024-03-20</span>
+                        <span>修复了 HTML 标签未闭合的严重 Bug</span>
+                    </li>
+                    <li class="changelog-item">
+                        <span class="changelog-date">2024-03-19</span>
+                        <span>添加了 JavaScript 逻辑，让页面动起来了</span>
+                    </li>
+                    <li class="changelog-item">
+                        <span class="changelog-date">2024-03-18</span>
+                        <span>初始化项目</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Markdown 编辑器模块 -->
+        <div class="markdown-container">
+            <div class="markdown-header">
+                <h3><i class="fas fa-edit"></i> 实时 Markdown 演示</h3>
+                <button class="editor-toggle" id="editorToggle">显示/隐藏源码</button>
+            </div>
+            
+            <div class="editor-wrapper">
+                <!-- 这里补全了原本断掉的 Textarea -->
+                <textarea class="markdown-editor" id="markdownEditor">
+## 欢迎使用
+这是一个 **实时预览** 的编辑器。
+
+- 你可以在这里修改文字
+- 下面会自动变化
+- 支持代码高亮
+
+```javascript
+console.log("Hello GitHub!");
+```
+</textarea>
+            
+            <!-- 这里添加了原本缺失的预览区域 -->
+            <div id="markdownPreview" class="markdown-preview"></div>
+        </div>
+    </div>
+</div>
+
+<p style="color: rgba(255,255,255,0.6); margin-top: 20px; font-size: 0.8rem;">
+    Powered by Git & GitHub Pages
+</p>
+</div>
+<!-- 这里添加了原本缺失的 JavaScript 逻辑 -->
+<script>
+// 1. 初始化 Markdown 解析器
+const editor = document.getElementById('markdownEditor');
+const preview = document.getElementById('markdownPreview');
+
+// 渲染函数
+function renderMarkdown() {
+const rawText = editor.value;
+// 使用 marked 库将 markdown 转换为 html
+preview.innerHTML = marked.parse(rawText);
+// 让 highlight.js 对代码块进行高亮
+document.querySelectorAll('pre code').forEach((el) => {
+hljs.highlightElement(el);
+});
+}
+
+// 监听输入，实时渲染
+editor.addEventListener('input', renderMarkdown);
+
+// 页面加载时先渲染一次
+renderMarkdown();
+
+// 2. 更新日志折叠逻辑
+const logToggle = document.getElementById('changelogToggle');
+const logContent = document.getElementById('changelogContent');
+const icon = document.getElementById('toggleIcon');
+
+logToggle.addEventListener('click', () => {
+logContent.classList.toggle('active');
+// 旋转箭头图标
+icon.style.transform = logContent.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+});
+
+// 3. 编辑器显示/隐藏逻辑
+const editorToggle = document.getElementById('editorToggle');
+editorToggle.addEventListener('click', () => {
+editor.classList.toggle('active');
+});
+</script>
 </body>
 </html>
